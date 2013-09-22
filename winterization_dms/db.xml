@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<schema version="0.3">
+  <table name="testTable">
+    <desc>This is a test table to see where the db.xml file has to be to be installed.</desc>
+    <field name="tID" type="I">
+      <key/>
+      <autoincrement/>
+    </field>
+  </table>
+  <table name="winter_Project">
+    <desc>Describes the Winterization project year for data correlation and to store unique information to each year.</desc>
+    <field name="project_id" type="I"><key/><autoincrement/></field>
+    <field name="service_date" type="D"><unique/><notnull/></field>
+    <field name="current" type="L"><notnull/><default value="0"/></field>
+  </table>
+  <table name="winter_Residents">
+    <field name="res_id" type="I"><key/><autoincrement/><unsigned/></field>
+    <field name="res_projid" type="I"><notnull/></field>
+    <field name="res_firstname" type="C" size="50"><notnull/></field>
+    <field name="res_lastname" type="C" size="100"><notnull/></field>
+    <field name="res_address" type="C" size="100"></field>
+    <field name="res_city" type="C" size="100"></field>
+    <field name="res_zipcode" type="C" size="10"></field>
+    <field name="res_complete" type="L"><notnull/><default value="0"/></field>
+    <field name="res_callback" type="L"><nostnull/><default value="1"/></field>
+    <field name="res_notes" type="XL">
+      <constraint>
+        , UNIQUE (res_projid, res_firstname, res_lastname)
+        , FOREIGN KEY (res_projid) REFERENCES winter_Project(project_id)
+      </constraint>
+    </field>
+  </table>
+  <table name="winter_JobTasks">
+    <field name="job_id" type="I"><autoincrement/><key/><unsigned/></field>
+    <field name="job_name" type="C" size="100"><notnull/></field>
+    <field name="job_valuename" type="C" size="100"><desc>References additional data to main resident job. Use same value as name with valuetype=checkbox to reference main enable value for sub values under name</desc><notnull/></field>
+    <field name="job_valuetype" type="C" size="20"><desc>Datatype for additional data field. Possible Values: radio, text, checkbox, textarea, select</desc><notnull/></field>
+    <field name="job_valueoptions" type="X" size="4000"><desc>Leave NULL for text fields. Use comma delimitted list for radio and select</desc></field>
+    <field name="job_valuedefault" type="C" size="30"><desc>Use value from list for radio, checkbox, and select. Use default text for text fields. Leave NULL for first value in list or blank text field</desc></field>
+    <field name="job_enabled" type="L"><desc>If job should appear in form</desc><default value="1"/>
+      <constraint>
+        , UNIQUE (job_name, job_valuename)
+      </constraint>
+    </field>
+  </table>
+  <table name="winter_ResidentJobTasks">
+    <field name="resjob_jobid" type="I"><unsigned/></field>
+    <field name="resjob_resid" type="I"><unsigned/></field>
+    <field name="resjob_value" type="C" size="255"><desc>If the Job valueoptions is not NULL, the value must be within the given list</desc>
+      <constraint>
+        , PRIMARY KEY(resjob_jobid, resjob_resid)
+        , FOREIGN KEY(resjob_jobid) REFERENCES winter_JobTasks(job_id)
+        , FOREIGN KEY(resjob_resid) REFERENCES winter_Residents(res_id)
+      </constraint>
+    </field>
+  </table>
+</schema>
