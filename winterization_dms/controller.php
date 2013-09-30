@@ -23,10 +23,10 @@ class WinterizationDMSPackage extends Package {
     SinglePage::add('/test_page', $pkg);
     SinglePage::add('/test_page/test2', $pkg);
     SinglePage::add('/winterization', $pkg);
+    SinglePage::add('/winterization/administration', $pkg);
+    SinglePage::add('/winterization/administration/projects', $pkg);
+    SinglePage::add('/winterization/administration/residentjobs', $pkg);
     SinglePage::add('/winterization/crew', $pkg);
-    SinglePage::add('/winterization/crew/administration', $pkg);
-    SinglePage::add('/winterization/crew/administration/projects', $pkg);
-    SinglePage::add('/winterization/crew/administration/residentjobs', $pkg);
     SinglePage::add('/winterization/crew/residents', $pkg);
     SinglePage::add('/winterization/crew/residents/resident', $pkg);
     SinglePage::add('/developer', $pkg);

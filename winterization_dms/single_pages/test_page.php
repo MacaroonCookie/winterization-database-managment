@@ -16,5 +16,13 @@ echo '<h4><label for="hi">Hi</label><input type="checkbox" name="hi" value="hi"/
 echo $frm->radio('hello', 'Hello', 'hello');
 echo $frm->label('hello2', 'Hi!');
 echo $frm->radio('hello', 'Hi', TRUE);
-exit();
 ?>
+
+<div id="effect" style="height: 100px; width: 75px; border: 3px solid black;"></div>
+<script>
+  $("#effect").click(function() {
+    $("#effect").slideUp(1000);
+    setTimeout(function() {$("#effect").slideDown(1000);}, 3000);
+    return false;
+  });
+</script>
