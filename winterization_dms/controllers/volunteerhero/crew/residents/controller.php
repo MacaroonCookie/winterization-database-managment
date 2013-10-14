@@ -1,6 +1,6 @@
 <?php
   Loader::model('resident', 'winterization_dms');
-  class WinterizationCrewResidentsController extends Controller {
+  class VolunteerheroCrewResidentsController extends Controller {
     private $resident;
     public function on_start() {
       $resident = new ResidentModel();

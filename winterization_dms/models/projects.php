@@ -7,7 +7,7 @@ class ProjectsModel {
 
   public function __construct() {
     $this->db = Loader::db();
-    $result = $this->db->execute('SELECT * FROM winter_Project');
+    $result = $this->db->execute('SELECT * FROM volunteerhero_Project');
     while( $rs = $result->FetchRow() ) {
       array_push($this->projects, array('id'=>$rs['project_id'], 'date'=>date('m/d/Y', strtotime($rs['service_date'])), 'current'=>$rs['current']==1?TRUE:FALSE));
     }

@@ -1,7 +1,7 @@
 <?php
 defined('C5_EXECUTE') or die(_("Access Denied."));
-Loader::model('project', 'winterization_dms');
-Loader::model('jobs', 'winterization_dms');
+Loader::model('project', 'volunteerhero');
+Loader::model('jobs', 'volunteerhero');
 class ResidentModel {
   public $id=NULL, $pid, $firstname, $lastname, $address, $city, $zip, $complete, $callback, $jobs, $notes;
   private $db, $frm;
@@ -36,7 +36,7 @@ class ResidentModel {
   }
 
   private function _newResident() {
-    $this->db->execute('INSERT INTO winter_Residents(res_id, res_projid, res_firstname, res_lastname, res_address, res_city, res_zipcode, res_complete, res_callback, res_notes) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    $this->db->execute('INSERT INTO volunteerhero_Residents(res_id, res_projid, res_firstname, res_lastname, res_address, res_city, res_zipcode, res_complete, res_callback, res_notes) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         array($this->id, $this->pid, $this->firstname, $this->lastname, $this->address, $this->city, $this->zip, $this->complete, $this->callback, $this->notes));
     $this->jobs->add();
   }
@@ -44,9 +44,9 @@ class ResidentModel {
   private function _getResident() {
     $result = NULL;
     if( $this->id!=NULL ) {
-      $result = $this->db->execute('SELECT * FROM winter_Residents WHERE res_id=?', array($this->id));
+      $result = $this->db->execute('SELECT * FROM volunteerhero_Residents WHERE res_id=?', array($this->id));
     } else if( $this->firstname!=NULL && $this->lastname!=NULL && $this->pid!=NULL ) {
-      $result = $this->db->execute('SELECT * FROM winter_Residents WHERE res_projid=? AND res_firstname LIKE ? AND res_lastname LIKE ?',
+      $result = $this->db->execute('SELECT * FROM volunteerhero_Residents WHERE res_projid=? AND res_firstname LIKE ? AND res_lastname LIKE ?',
                                    array($this->pid, $this->firstname, $this->lastname));
     }
     $rs = '';
@@ -69,15 +69,15 @@ class ResidentModel {
   }
 
   private function _updateResident() {
-    $this->db->execute('UPDATE winter_Residents res_projid=?, res_firstname=?, res_lastname=?, res_address=?, res_city=?, res_zipcode=?, res_complete=?, res_callback=?, res_notes=? WHERE res_id=?',
+    $this->db->execute('UPDATE volunteerhero_Residents res_projid=?, res_firstname=?, res_lastname=?, res_address=?, res_city=?, res_zipcode=?, res_complete=?, res_callback=?, res_notes=? WHERE res_id=?',
                        array($this->pid, $this->firstname, $this->lastname, $this->address, $this->city, $this->zip, $this->complete, $this->callback, $this->notes, $this->id));
     $this->jobs->update();
   }
 
   private function _deleteResident() {
     if( $this->id==NULL ) return;
-    $this->db->execute('DELETE FROM winter_ResidentJobTasks WHERE resjob_resid=?', array($this->id));
-    $this->db->execute('DELETE FROM winter_Residents WHERE res_id=?', array($this->id));
+    $this->db->execute('DELETE FROM volunteerhero_ResidentJobTasks WHERE resjob_resid=?', array($this->id));
+    $this->db->execute('DELETE FROM volunteerhero_Residents WHERE res_id=?', array($this->id));
   }
 
   public function getForm($action) {

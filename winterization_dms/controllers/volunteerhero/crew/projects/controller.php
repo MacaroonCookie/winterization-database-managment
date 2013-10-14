@@ -1,6 +1,6 @@
 <?php
   defined('C5_EXECUTE') or die(_("Access Denied."));
-  class WinterizationAdministrationProjectsController extends Controller {
+  class VolunteerheroAdministrationProjectsController extends Controller {
     private $d,$h;
 
     public function on_start() {

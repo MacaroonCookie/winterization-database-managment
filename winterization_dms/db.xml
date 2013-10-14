@@ -1,19 +1,12 @@
 <?xml version="1.0"?>
 <schema version="0.3">
-    <!-- <table name="testTable">
-    <desc>This is a test table to see where the db.xml file has to be to be installed.</desc>
-    <field name="tID" type="I">
-      <key/>
-      <autoincrement/>
-    </field>
-  </table> -->
-  <table name="winterProject">
-    <desc>Describes the Winterization project year for data correlation and to store unique information to each year.</desc>
+  <table name="volunteerheroProject">
+    <desc>Describes the volunteerhero project year for data correlation and to store unique information to each year.</desc>
     <field name="project_id" type="I"><key/><autoincrement/></field>
     <field name="service_date" type="D"><unique/><notnull/></field>
     <field name="current" type="L"><notnull/><default value="0"/></field>
   </table>
-  <table name="winterResidents">
+  <table name="volunteerheroResidents">
     <field name="res_id" type="I"><key/><autoincrement/><unsigned/></field>
     <field name="res_projid" type="I"><notnull/></field>
     <field name="res_firstname" type="C" size="50"><notnull/></field>
@@ -26,11 +19,11 @@
     <field name="res_notes" type="XL">
       <constraint>
         , UNIQUE (res_projid, res_firstname, res_lastname)
-        , FOREIGN KEY (res_projid) REFERENCES winterProject(project_id)
+        , FOREIGN KEY (res_projid) REFERENCES volunteerheroProject(project_id)
       </constraint>
     </field>
   </table>
-  <table name="winterJobTasks">
+  <table name="volunteerheroJobTasks">
     <field name="job_id" type="I"><autoincrement/><key/><unsigned/></field>
     <field name="job_name" type="C" size="100"><notnull/></field>
     <field name="job_valuename" type="C" size="100"><desc>References additional data to main resident job. Use same value as name with valuetype=checkbox to reference main enable value for sub values under name</desc><notnull/></field>
@@ -43,15 +36,20 @@
       </constraint>
     </field>
   </table>
-  <table name="winterResidentJobTasks">
+  <table name="volunteerheroResidentJobTasks">
     <field name="resjob_jobid" type="I"><unsigned/></field>
     <field name="resjob_resid" type="I"><unsigned/></field>
     <field name="resjob_value" type="C" size="255"><desc>If the Job valueoptions is not NULL, the value must be within the given list</desc>
       <constraint>
         , PRIMARY KEY(resjob_jobid, resjob_resid)
-        , FOREIGN KEY(resjob_jobid) REFERENCES winterJobTasks(job_id)
-        , FOREIGN KEY(resjob_resid) REFERENCES winterResidents(res_id)
+        , FOREIGN KEY(resjob_jobid) REFERENCES volunteerheroJobTasks(job_id)
+        , FOREIGN KEY(resjob_resid) REFERENCES volunteerheroResidents(res_id)
       </constraint>
     </field>
+  </table>
+  <table name="volunteerheroRegisteredVolunteer">
+    <field name="regvolid" type="I"><unsigned/></field>
+    <field name="regvol_projid" type="I"><unsigned/></field>
+    <field name="regvol_uid" type="I"><unsigned/></field>
   </table>
 </schema>

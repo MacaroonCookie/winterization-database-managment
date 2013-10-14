@@ -12,9 +12,9 @@ class ProjectModel {
     } else if( $this->state=='get' ) {
       $result = NULL;
       if( $id==NULL ) {
-        $result = $this->db->execute("SELECT * FROM winter_Project WHERE current=TRUE");
+        $result = $this->db->execute("SELECT * FROM volunteerhero_Project WHERE current=TRUE");
       } else {
-        $result = $this->db->execute("SELECT * FROM winter_Project WHERE project_id=?", array($id));
+        $result = $this->db->execute("SELECT * FROM volunteerhero_Project WHERE project_id=?", array($id));
         if( $result->RecordCount() <= 0 ) {
           return;
         }
@@ -26,11 +26,11 @@ class ProjectModel {
       // Need to add error checking
     } else if( $this->state=='add' ) {
       if( $date==NULL ) return;
-      $this->db->execute("INSERT INTO winter_Project(service_date, current) VALUES (CAST(? AS DATE), ?)", array(date("Y-m-d", strtotime($date)), $current));
+      $this->db->execute("INSERT INTO volunteerhero_Project(service_date, current) VALUES (CAST(? AS DATE), ?)", array(date("Y-m-d", strtotime($date)), $current));
       // Need to add error checking
     } else if( $this->state=='update' ) {
       if( $date==NULL || $id==NULL ) return;
-      $this->db->execute("UPDATE winter_Project SET service_date=CAST(? AS DATE), current=? WHERE project_id=?", array(date("Y-m-d", strtotime($date)), $current, $id));
+      $this->db->execute("UPDATE volunteerhero_Project SET service_date=CAST(? AS DATE), current=? WHERE project_id=?", array(date("Y-m-d", strtotime($date)), $current, $id));
       // Need to add error checking
     }
   }

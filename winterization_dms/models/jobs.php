@@ -14,7 +14,7 @@ class JobsModel {
     if( $state=='set' ) {
       if( $resid==NULL ) return;
     } else if( $state=='new' ) {
-      $result = $this->db("SELECT * FROM winter_JobTasks WHERE job_enabled=TRUE");
+      $result = $this->db("SELECT * FROM volunteerhero_JobTasks WHERE job_enabled=TRUE");
       while( $r = $result->getRow() ) {
         if( !isset($this->jobs[$r['job_name']]) ) $jobs[$r['job_name']] = array();
         array_push($this->jobs[$r['job_name']],
@@ -28,7 +28,7 @@ class JobsModel {
       }
     } else {
       if( $this->rid==NULL ) return;
-      $result = $this->db("SELECT * FROM winter_ResidentJobTasks LEFT JOIN winter_Residents ON resjob_resid=res_id INNER JOIN winter_JobTasks ON resjob_jobid=job_id WHERE (res_id=NULL AND job_enabled=TRUE) OR res_id=?", array($this->rid));
+      $result = $this->db("SELECT * FROM volunteerhero_ResidentJobTasks LEFT JOIN winter_Residents ON resjob_resid=res_id INNER JOIN winter_JobTasks ON resjob_jobid=job_id WHERE (res_id=NULL AND job_enabled=TRUE) OR res_id=?", array($this->rid));
       while( $r = $result->getRow() ) {
         if( !isset($this->jobs[$r['job_name']]) ) $jobs[$r['job_name']] = array();
         array_push($this->jobs[$r['job_name']], array('id'=>$r['job_id'], 'name'=>$r['job_valuename'], 'type'=>$r['job_valuetype'], 'options'=>$r['job_valueoptions'], 'value'=>$r['res_id']==NULL?$r['job_valuedefault']:$r['resjob_value'], 'enabled'=>$r['job_enabled']==1?TRUE:FALSE, 'filled'=>$r['res_id']==NULL?FALSE:TRUE));
@@ -44,14 +44,14 @@ class JobsModel {
   public function update() {
     if( $this->state!='set' ) return;
     foreach($this->jobsupdate as $j) {
-      $res = $this->db->execute('SELECT resjob_value FROM winter_ResidentJobTasks WHERE resjob_jobid=? resjob_resid=?', array($j['jid'], $this->rid));
+      $res = $this->db->execute('SELECT resjob_value FROM volunteerhero_ResidentJobTasks WHERE resjob_jobid=? resjob_resid=?', array($j['jid'], $this->rid));
       if( $res->_numOfRows>=1 ) {
         $r = $res->getRow();
         if( $r['resjob_value'] != $j['value'] ) {
-          $this->db->execute('UPDATE winter_ResidentJobTasks SET resjob_value=? WHERE resjob_jobid=? AND resjob_resid=?', array($j['value'], $j['jid'], $this->rid));
+          $this->db->execute('UPDATE volunteerhero_ResidentJobTasks SET resjob_value=? WHERE resjob_jobid=? AND resjob_resid=?', array($j['value'], $j['jid'], $this->rid));
         }
       } else {
-        $this->db->execute('INSERT INTO winter_ResidentJobTasks VALUES(?, ?, ?)', array($j['jid'], $this->rid, $j['value']));
+        $this->db->execute('INSERT INTO volunteerhero_ResidentJobTasks VALUES(?, ?, ?)', array($j['jid'], $this->rid, $j['value']));
       }
     }
   }
