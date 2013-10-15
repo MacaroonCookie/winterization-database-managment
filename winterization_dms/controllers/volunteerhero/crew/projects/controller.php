@@ -12,9 +12,9 @@
 
     public function view() {
       $this->addHeaderItem($this->h->javascript('jquery.js'));
-      $this->addHeaderItem($this->h->javascript('winterization/administration/projects.js', 'winterization_dms'));
+      $this->addHeaderItem($this->h->javascript('volunteerhero/crew/projects.js', 'volunteerhero'));
       $projects_array = array();
-      $result = $this->d->execute("SELECT * FROM winter_Project ORDER BY service_date DESC");
+      $result = $this->d->execute("SELECT * FROM volunteerheroProject ORDER BY service_date DESC");
       while( $row=$result->fetchRow() ) {
         array_push($projects_array, array("id"=>$row["project_id"], "date"=>$row["service_date"], "current"=>$row["current"]));
       }

@@ -37,7 +37,7 @@
     </field>
   </table>
   <table name="volunteerheroResidentJobTasks">
-    <field name="resjob_jobid" type="I"><unsigned/></field>
+    <field name="resjob_jobid" type="I"><autoincrement/><unsigned/></field>
     <field name="resjob_resid" type="I"><unsigned/></field>
     <field name="resjob_value" type="C" size="255"><desc>If the Job valueoptions is not NULL, the value must be within the given list</desc>
       <constraint>
@@ -47,9 +47,57 @@
       </constraint>
     </field>
   </table>
+  <table name="ovlunteerheroVolunteerGroup">
+      <field name="volgrp_id" type="I"><autoincrement/><unsigned/><notnull/></field>
+    <field name="volgrp_name" type="C" size="255"><notnull/></field>
+    <field name="volgrp_description" type="X" size="4000"></field>
+    <field name="volgrp_projid" type="I"><notnull/></field>
+    <field name="volgrp_creator" type="I"><notnull/></field>
+    <field name="volgrp_created" type="T"><notnull/><deftimestamp/>
+      <constraint>
+        , PRIMARY KEY(volgrp_id)
+        , UNIQUE(volgrp_name, volgrp_projid)
+        , FOREIGN KEY(volgrp_projid) REFERENCES volunteerheroProject(project_id)
+        , FOREIGN KEY(volgrp_creator) REFERENCES Users(uID)
+    </field>
+  </table>
   <table name="volunteerheroRegisteredVolunteer">
-    <field name="regvolid" type="I"><unsigned/></field>
-    <field name="regvol_projid" type="I"><unsigned/></field>
-    <field name="regvol_uid" type="I"><unsigned/></field>
+    <field name="regvol_id" type="I"><unsigned/><notnull/></field>
+    <field name="regvol_grpid" type="I"><unsigned/><notnull/>
+    <field name="regvol_projid" type="I"><unsigned/><notnull/></field>
+    <field name="regvol_uid" type="I"><unsigned/><notnull/></field>
+    <field name="regvol_checkedin" type="L"><unsigned/><notnull/><default value="0"/>
+      <constraint>
+        , PRIMARY KEY(regvol_id)
+        , FOREIGN KEY(regvol_grpid) REFERENCES volunteerheroVolunteerGroup(volgrp_id)
+        , FOREIGN KEY(regvol_projid) REFERENCES volunteerheroProject(project_id)
+        , FOREIGN KEY(regvol_uid) REFERENCES Users(uID)
+        , UNIQUE(regvol_projid, regvol_uid)
+      </constraint>
+    </field>
+  </table>
+  <table name="volunteerheroDriving">
+    <field name="drv_regvol_id" type="I"><unsigned/><notnull/><key/></field>
+    <field name="drv_numofseats" type="I"><unsigned/><notnull/><default value="0"/><desc>Total number of seats in vehicle (including driver)</desc></field>
+  </table>
+  <table name="volunteerheroWorkGroup">
+    <field name="wrkgrp_id" type="I"><unsigned/><notnull/></field>
+    <field name="wrkgrp_projid" type="I"><unsigned/><notnull/></field>
+    <field name="wrkgrp_name" type="C" size="10"><notnull/></field>
+    <field name="wrkgrp_status" type="I1"><notnull/><default value="0"><desc>Status of group, 0-Not Ready, 1-OK to release, 3-Released</desc>
+      <constraint>
+        , PRIMARY KEY(wrkgrp_id)
+        , UNIQUE(wrkgrp_projid, wrkgrp_name)
+        , FOREIGN KEY(wrkgrp_projid) REFERENCES volunteerheroProject(project_id)
+      </constraint>
+    </field>
+  </table>
+  <table name="volunteerheroCheckedIn">
+    <field name="chk_volid" type="I"><unsigned/><notnull/>
+      <constraint>
+        , PRIMARY KEY(chk_volid)
+        , FOREIGN KEY(chk_volid) REFERENCES volunteerheroRegisteredVolunteer(regvol_id)
+      </constraint>
+    </field>
   </table>
 </schema>

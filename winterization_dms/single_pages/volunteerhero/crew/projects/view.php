@@ -1,4 +1,5 @@
 <?php defined('C5_EXECUTE') or die(_("Access Denied.")); ?>
+
 <?php if( $this->controller->getTask()=="add" || $this->controller->getTask()=="update" || $this->controller->getTask()=="setcurrent" ) { ?>
   <div class="winter-output">
     <?php if( isset( $output ) ) { ?>
