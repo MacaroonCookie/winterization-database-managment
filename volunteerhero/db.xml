@@ -109,4 +109,17 @@
       </constraint>
     </field>
   </table>
+  <table name="volunteerheroChangeQueue">
+    <field name="chg_id" type="I8"><autoincrement/><unsigned/><notnull/></field>
+    <field name="chg_time" type="T"><notnull/><deftimestamp/></field>
+    <field name="chg_user" type="I"><notnull/><unsigned/></field>
+    <field name="chg_projid" type="I"><unsigned/><notnull/></field>
+    <field name="chg_table" type="C" size="255"><notnull/></field>
+    <field name="chg_oldvalues" type="X" size="40000"><notnull/></field>
+    <field name="chg_newvalues" type="X" size="40000"><notnull/>
+      , PRIMARY KEY(chg_id)
+      , FOREIGN KEY(chg_user) REFERENCES Users(uID)
+      , FOREIGN KEY(chg_projid) REFERENCES volunteerheroProject(project_id)
+    </field>
+  </table>
 </schema>
