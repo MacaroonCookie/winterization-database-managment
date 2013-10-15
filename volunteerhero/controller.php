@@ -1,7 +1,7 @@
 <?php
 defined('C5_EXECUTE') or die("Access Denied.");
 
-class volunteerheroDMSPackage extends Package {
+class VolunteerHeroPackage extends Package {
   protected $pkgHandle = 'volunteerhero';
   protected $appVersionRequired = '5.6.1.2';
   protected $pkgVersion = '1.0';

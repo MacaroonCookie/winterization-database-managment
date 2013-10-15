@@ -24,7 +24,7 @@
     </field>
   </table>
   <table name="volunteerheroJobTasks">
-    <field name="job_id" type="I"><autoincrement/><key/><unsigned/></field>
+    <field name="job_id" type="I"><autoincrement/><key/><unsigned/><notnull/></field>
     <field name="job_name" type="C" size="100"><notnull/></field>
     <field name="job_valuename" type="C" size="100"><desc>References additional data to main resident job. Use same value as name with valuetype=checkbox to reference main enable value for sub values under name</desc><notnull/></field>
     <field name="job_valuetype" type="C" size="20"><desc>Datatype for additional data field. Possible Values: radio, text, checkbox, textarea, select</desc><notnull/></field>
@@ -37,7 +37,7 @@
     </field>
   </table>
   <table name="volunteerheroResidentJobTasks">
-    <field name="resjob_jobid" type="I"><autoincrement/><unsigned/></field>
+    <field name="resjob_jobid" type="I"><autoincrement/><unsigned/><notnull/></field>
     <field name="resjob_resid" type="I"><unsigned/></field>
     <field name="resjob_value" type="C" size="255"><desc>If the Job valueoptions is not NULL, the value must be within the given list</desc>
       <constraint>
@@ -47,7 +47,7 @@
       </constraint>
     </field>
   </table>
-  <table name="ovlunteerheroVolunteerGroup">
+  <table name="volunteerheroVolunteerGroup">
       <field name="volgrp_id" type="I"><autoincrement/><unsigned/><notnull/></field>
     <field name="volgrp_name" type="C" size="255"><notnull/></field>
     <field name="volgrp_description" type="X" size="4000"></field>
@@ -59,11 +59,12 @@
         , UNIQUE(volgrp_name, volgrp_projid)
         , FOREIGN KEY(volgrp_projid) REFERENCES volunteerheroProject(project_id)
         , FOREIGN KEY(volgrp_creator) REFERENCES Users(uID)
+      </constraint>
     </field>
   </table>
   <table name="volunteerheroRegisteredVolunteer">
-    <field name="regvol_id" type="I"><unsigned/><notnull/></field>
-    <field name="regvol_grpid" type="I"><unsigned/><notnull/>
+    <field name="regvol_id" type="I"><autoincrement/><unsigned/><notnull/></field>
+    <field name="regvol_grpid" type="I"><unsigned/></field>
     <field name="regvol_projid" type="I"><unsigned/><notnull/></field>
     <field name="regvol_uid" type="I"><unsigned/><notnull/></field>
     <field name="regvol_checkedin" type="L"><unsigned/><notnull/><default value="0"/>
@@ -78,13 +79,17 @@
   </table>
   <table name="volunteerheroDriving">
     <field name="drv_regvol_id" type="I"><unsigned/><notnull/><key/></field>
-    <field name="drv_numofseats" type="I"><unsigned/><notnull/><default value="0"/><desc>Total number of seats in vehicle (including driver)</desc></field>
+    <field name="drv_numofseats" type="I"><unsigned/><notnull/><default value="0"/><desc>Total number of seats in vehicle (including driver)</desc>
+      <constraint>
+        , FOREIGN KEY(drv_regvol_id) REFERENCES volunteerheroRegisteredVolunteer(regvol_id)
+      </constraint>
+    </field>
   </table>
   <table name="volunteerheroWorkGroup">
-    <field name="wrkgrp_id" type="I"><unsigned/><notnull/></field>
+    <field name="wrkgrp_id" type="I"><unsigned/><notnull/><autoincrement/></field>
     <field name="wrkgrp_projid" type="I"><unsigned/><notnull/></field>
     <field name="wrkgrp_name" type="C" size="10"><notnull/></field>
-    <field name="wrkgrp_status" type="I1"><notnull/><default value="0"><desc>Status of group, 0-Not Ready, 1-OK to release, 3-Released</desc>
+    <field name="wrkgrp_status" type="I1"><notnull/><default value="0"/><desc>Status of group, 0-Not Ready, 1-OK to release, 3-Released</desc>
       <constraint>
         , PRIMARY KEY(wrkgrp_id)
         , UNIQUE(wrkgrp_projid, wrkgrp_name)
@@ -92,11 +97,15 @@
       </constraint>
     </field>
   </table>
-  <table name="volunteerheroCheckedIn">
-    <field name="chk_volid" type="I"><unsigned/><notnull/>
+  <table name="volunteerheroWorkGroupAssignments">
+    <field name="wrkasn_id" type="I"><notnull/><autoincrement/><unsigned/></field>
+    <field name="wrkasn_volid" type="I"><notnull/><unsigned/></field>
+    <field name="wrkasn_wrkid" type="I"><notnull/><unsigned/>
       <constraint>
-        , PRIMARY KEY(chk_volid)
-        , FOREIGN KEY(chk_volid) REFERENCES volunteerheroRegisteredVolunteer(regvol_id)
+        , PRIMARY KEY(wrkasn_id)
+        , UNIQUE(wrkasn_volid, wrkasn_wrkid)
+        , FOREIGN KEY(wrkasn_volid) REFERENCES volunteerheroRegisteredVolunteer(regvol_id)
+        , FOREIGN KEY(wrkasn_wrkid) REFERENCES volunteerheroWorkGroup(wrkgrp_id)
       </constraint>
     </field>
   </table>
