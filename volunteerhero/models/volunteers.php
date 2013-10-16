@@ -1,11 +1,29 @@
 <?php defined('C5_EXECUTE') or die(_("Access Denied."));
-class VolunteerModel {
-  private name=NULL, email=NULL, checkedin=NULL,
-      uid=NULL,  // User ID (Concrete5 reference)
-      rid=NULL,  // Registered ID (VH ref)
-      vgid=NULL, // Volunteer group id
-      wgid=NULL, // Work Group id
-      pid=NULL;  // Project Year Id
+class VolunteerList {
+  public $vList = array();
+
+  public function __construct($onlycheckedin=FALSE) {
+    $db = Loader::db();
+    $query = "SELECT regvol_id FROM volunteerheroRegisteredVolunteer";
+    if( $onlycheckedin ) $query .= " WHERE regvol_checkedin=1";
+    $res = $db->Execute($query);
+    while( $row = $res->FetchRow() ) {
+      $v = Volunteer::getByID($row['regvol_id']);
+      if( !in_array($v, $this->vList) )
+        array_push($this->vList, $v);
+    }
+  }
+
+  public function getList() { return $this->vList; }
+}
+
+class Volunteer {
+  public $name=NULL, $email=NULL, $checkedin=NULL,
+      $uid=NULL,  // User ID (Concrete5 reference)
+      $rid=NULL,  // Registered ID (VH ref)
+      $vgid=NULL, // Volunteer group id
+      $wgid=NULL, // Work Group id
+      $pid=NULL;  // Project Year Id
 
   public function __construct($id=NULL, $name=NULL) {
     if( $id==NULL && $name==NULL ) {
@@ -14,15 +32,15 @@ class VolunteerModel {
     $db = Loader::db();
 
     $query = "SELECT uID, uEmail, uName, regvol_id, regvol_grpid, ".
-             "regvol_wrkgrpid, regvol_projid, regvol_checkedin FROM Users".
+             "regvol_wrkgrpid, regvol_projid, regvol_checkedin FROM Users ".
              "INNER JOIN volunteerheroRegisteredVolunteer ON ".
              "Users.uID=volunteerheroRegisteredVolunteer.regvol_uid ".
-             "WHERE "(.$id==NULL?"":"uID=$id ").
+             "WHERE ".($id==NULL?"":"uID=$id ").
              ($id!=NULL&&$name!=NULL?"AND ":"").
              ($name==NULL?"":"uName LIKE \"$name\"");
     $res = $db->Execute($query);
     if( $res ) {
-      $row = $r->FetchRow();
+      $row = $res->FetchRow();
       $this->name = $row['uName'];
       $this->uid  = $row['uID'];
       $this->email= $row['uEmail'];
@@ -42,6 +60,8 @@ class VolunteerModel {
   public function getVolunteerGroupID() { return $this->vgid; }
   public function getWorkGroupID() { return $this->wgid; }
   public function getProjectYearID() { return $this->pid; }
+  public static function getByID($id) { return new Volunteer($id); }
+  public static function getByName($name) { return new Volunteer(NULL, $name); }
 
   public function setVolunteerGroup($vid) {
     if( $this->uID == NULL ) return NULL;
@@ -88,11 +108,12 @@ class VolunteerModel {
     $db = Loader::db();
     $query = "INSERT INTO volunteerheroRegisteredVolunteer(regvol_grpid, ".
              "regvol_wrkgrpid, regvol_projid, regvol_uid, regvol_checkedin) ".
-             "VALUES($vgid, $wgid, $pid, $uid, $checkedin)");
+             "VALUES($vgid, $wgid, $pid, $uid, ".($checkedin?1:0).")";
+    $db->Execute($query);
     $ret = $id = NULL;
-    if( $db->AffectedRows() != 0 ) {
+    if( $db->Affected_Rows() != 0 ) {
       $id = $db->Insert_ID();
-      $ret = new VolunteerModel($id);
+      $ret = new Volunteer($id);
     }
     return $ret;
   }

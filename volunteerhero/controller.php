@@ -36,6 +36,7 @@ class VolunteerHeroPackage extends Package {
     Loader::model('single_page');
     SinglePage::add('/test_page', $pkg);
     SinglePage::add('/test_page/test2', $pkg);
+    SinglePage::add('/test_page/testvolunteers', $pkg);
     SinglePage::add('/volunteerhero', $pkg);
     SinglePage::add('/volunteerhero/administration', $pkg);
     SinglePage::add('/volunteerhero/administration/residentjobs', $pkg);
