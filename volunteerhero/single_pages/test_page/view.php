@@ -2,7 +2,18 @@
 
 $db = Loader::db();
 $frm = Loader::helper('form');
-$result = $db->execute('SELECT NULL');
+$result = $db->execute('INSERT INTO volunteerheroProject(service_date,current) VALUES("5/5/2012-0:0:0", 1)');
+print("<h2>ID:".$db->Insert_ID()."&nbsp;RRows: ".$result->RecordCount()."&nbsp;DBRows: ".$db->Affected_Rows()."</h2>");
+
+print("<h3>Result</h3>");
+foreach(get_class_methods($result) as $c) {
+  print($c . "<br/>");
+}
+print("<h3>DB</h3>");
+foreach(get_class_methods($db) as $c) {
+  print($c . "<br/>");
+}
+exit();
 /*print_r($db);
 echo '<br/><br/>';
 print_r(get_class_methods($db));

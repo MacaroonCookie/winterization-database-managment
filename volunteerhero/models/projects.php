@@ -32,7 +32,7 @@ class ProjectsModel {
         if( $p['current'] ) $this->yearListForSelect['default'] = $p['id'];
       }
     }
-    return $tthis->yearListForSelect;
+    return $this->yearListForSelect;
   }
 }
 
