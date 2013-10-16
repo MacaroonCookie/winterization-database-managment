@@ -64,7 +64,7 @@ class Volunteer {
   public static function getByName($name) { return new Volunteer(NULL, $name); }
 
   public function setVolunteerGroup($vid) {
-    if( $this->uID == NULL ) return NULL;
+    if( $this->uid == NULL ) return NULL;
     $db = Loader::db();
     $db->Execute("UPDATE volunteerheroRegisteredVolunteer SET ".
         "regvol_grpid = ? WHERE regvol_id=?", array($vid, $this->rid));
@@ -74,7 +74,7 @@ class Volunteer {
   }
 
   public function setWorkGroup($wid) {
-    if( $this->uID == NULL ) return NULL;
+    if( $this->uid == NULL ) return NULL;
     $db = Loader::db();
     $db->Execute("UPDATE volunteerheroRegisteredVolunteer SET ".
         "regvol_wrkgrpid = ? WHERE regvol_id=?", array($wid, $this->rid));
