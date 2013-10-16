@@ -6,13 +6,13 @@ class VolunteerHeroPackage extends Package {
   protected $appVersionRequired = '5.6.1.2';
   protected $pkgVersion = '1.0';
 
-  private $install_groups = array("volunteerhero_crew"=>"Description",
-                                  "volunteerhero_president"=>"Description",
-                                  "volunteerhero_volunteer"=>"Description",
-                                  "volunteerhero_resident"=>"Description");
+  private $install_groups = array("Volunteer Hero Crew Member"=>"Description",
+                                  "Volunteer Hero President"=>"Description",
+                                  "Volunteer Hero Volunteer"=>"Description",
+                                  "Volunteer Hero Resident"=>"Description");
 
   public function getPackageDescription() {
-    return t("Package Description (fill in later)");
+    return t("A system to manage volunteers. Allowing for volunteer registration, check-in, and much more, Volunteer Hero will help you organize your event.");
   }
 
   public function getPackageName() {
@@ -23,12 +23,12 @@ class VolunteerHeroPackage extends Package {
     $pkg = parent::install();
 
     Loader::model("groups");
-    foreach($install_groups as $g) {
+    foreach($this->install_groups as $g=>$d) {
       $grp = Group::getByName($g);
-      if( !($grp instanceof Group) ) {
-        $g->delete();
+      if( $grp instanceof Group ) {
+        $grp->delete();
       }
-      Group::add($g, $install_groups[$g]);
+      $id = Group::add($g, $d)->getGroupID();
     }
 
     // Install Block Example
