@@ -3,9 +3,36 @@
 class WorkGroupList {
   public wList = array();
 
-  public function __construct() {
+  public function __construct($id=NULL, $name=NULL, $status=NULL, $eventid=NULL) {
+    $compare = array();
+    if( $id!=NULL ) array_push($compare, "wrkgrp_id=$id");
+    if( $name!=NULL ) array_push($compare, "wrkgrp_name LIKE \"$name\"");
+    if( $status!=NULL ) array_push($compare, "wrkgrp_status=$status");
+    if( $eventid!=NULL ) array_push($compare, "wrkgrp_projid=$eventid");
 
+    $query = "SELECT wrkgrp_id FROM volunteerheroWorkGroup";
+    $len = count($compare);
+    if( $len > 0 ) {
+      $query .= " WHERE";
+      for($i=0; $i<$len; $i++) {
+        $query .= " " . $compare[$i];
+        if( $i < $len-1 ) $query .= " AND";
+      }
+    }
+
+    $db = Loader::db();
+    $res = $db->Execute($query);
+    while( $row=$res->FetchRow() ) {
+      $w = WorkGroup::getByID($row['wrkgrp_id']);
+      if( !in_array($w, $wList) ) array_push($this->wList, $w);
+    }
   }
+
+  public function getList() { return $this->wList; }
+  public static function getWorkGroupByID($id) { return new WorkGroupList($id); }
+  public static function getWorkGroupByName($name) { return new WorkGroupList(NULL, $name); }
+  public static function getWorkGroupByStatus($status) { return new WorkGroupList(NULL, NULL, $status); }
+  public static function getWorkGroupByEvent($eid) { return new WorkGroupList(NULL, NULL, NULL, $eid); }
 }
 
 class WorkGroup {
@@ -34,7 +61,6 @@ class WorkGroup {
     $db->Execute("UPDATE volunteerheroWorkGroup SET $rowname=? WHERE ".
         "wrkgrp_id=?", array($value, $this->wid);
     if( $db->AffectedRows()!=1 ) return NULL;
-    / UpdatUTE') or die(_("Access Denied."));
     _select($this->wid);
   }
 
