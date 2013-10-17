@@ -57,7 +57,8 @@ class WorkGroup {
     }
   }
 
-  b = Loader::db();
+  private function _update($rowname, $value) {
+    $db = Loader::db();
     $db->Execute("UPDATE volunteerheroWorkGroup SET $rowname=? WHERE ".
         "wrkgrp_id=?", array($value, $this->wid);
     if( $db->AffectedRows()!=1 ) return NULL;
