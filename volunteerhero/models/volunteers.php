@@ -1,20 +1,26 @@
 <?php defined('C5_EXECUTE') or die(_("Access Denied."));
-class VolunteerList {
-  public $vList = array();
 
-  public function __construct($onlycheckedin=FALSE) {
-    $db = Loader::db();
-    $query = "SELECT regvol_id FROM volunteerheroRegisteredVolunteer";
-    if( $onlycheckedin ) $query .= " WHERE regvol_checkedin=1";
-    $res = $db->Execute($query);
+class VolunteerList extends VolunteerHeroListModel {
+  public function __construct($checkedin=NULL, $name=NULL, $email=NULL, $grpid=NULL, $wrkgrpid=NULL, $evntid=NULL) {
+    parent::__construct("volunteerheroRegisteredVolunteer", "regvol_id");
+
+    if( $checkedin!=NULL ) $this->_addDirectCompare("regvol_checkedin", 1);
+    if( $name!=NULL ) $this->_addLikeCompare("uName", $name);
+    if( $email!=NULL ) $this->_addLikeCompare("uEmail", $email);
+    if( $grpid!=NULL ) $this->_addDirectCompare("regvol_grpid", $grpid);
+    if( $wrkgrpid!=NULL ) $this->_addDirectcompare("regvol_wrkgrpid", $wrkgrpid);
+    if( $evntid!=NULL ) $this->_addDirectCompare("regvol_projid", $evntid);
+
+    $query = "SELECT uID, uEmail, uName, regvol_id, regvol_grpid, ".
+             "regvol_wrkgrpid, regvol_projid, regvol_checkedin FROM Users ".
+             "INNER JOIN volunteerheroRegisteredVolunteer ON ".
+             "Users.uID=volunteerheroRegisteredVolunteer.regvol_uid";
+    $query = $query . $this->_getCompareClause();
+    $res = $this->_executeQuery($query);
     while( $row = $res->FetchRow() ) {
-      $v = Volunteer::getByID($row['regvol_id']);
-      if( !in_array($v, $this->vList) )
-        array_push($this->vList, $v);
+      $this->_addObject(Volunteer::getFromRow($row));
     }
   }
-
-  public function getList() { return $this->vList; }
 }
 
 class Volunteer {
@@ -25,31 +31,31 @@ class Volunteer {
       $wgid=NULL, // Work Group id
       $pid=NULL;  // Project Year Id
 
-  public function __construct($id=NULL, $name=NULL) {
-    if( $id==NULL && $name==NULL ) {
+  public function __construct($id=NULL, $name=NULL, $row=NULL) {
+    if( $id==NULL && $name==NULL && $row==NULL ) {
       return;
     }
-    $db = Loader::db();
+    if( $row==NULL ) {
+      if( $id!=NULL ) $this->_addDirectCompare("uID", $id);
+      if( $name!=NULL ) $this->_addLikeCompare("uName", $name);
 
-    $query = "SELECT uID, uEmail, uName, regvol_id, regvol_grpid, ".
-             "regvol_wrkgrpid, regvol_projid, regvol_checkedin FROM Users ".
-             "INNER JOIN volunteerheroRegisteredVolunteer ON ".
-             "Users.uID=volunteerheroRegisteredVolunteer.regvol_uid ".
-             "WHERE ".($id==NULL?"":"uID=$id ").
-             ($id!=NULL&&$name!=NULL?"AND ":"").
-             ($name==NULL?"":"uName LIKE \"$name\"");
-    $res = $db->Execute($query);
-    if( $res ) {
+      $query = "SELECT uID, uEmail, uName, regvol_id, regvol_grpid, ".
+               "regvol_wrkgrpid, regvol_projid, regvol_checkedin FROM Users ".
+               "INNER JOIN volunteerheroRegisteredVolunteer ON ".
+               "Users.uID=volunteerheroRegisteredVolunteer.regvol_uid";
+      $query = $query . $this->getCompareClause();
+      $res = $this->_executeQuery($query);
       $row = $res->FetchRow();
-      $this->name = $row['uName'];
-      $this->uid  = $row['uID'];
-      $this->email= $row['uEmail'];
-      $this->rid  = $row['regvol_id'];
-      $this->vgid = $row['regvol_grpid'];
-      $this->wgid = $row['regvol_wrkgrpid'];
-      $this->pid  = $row['regvol_projid'];
-      $this->checkedin = $row['regvol_checkedin'];
     }
+
+    $this->name = $row['uName'];
+    $this->uid  = $row['uID'];
+    $this->email= $row['uEmail'];
+    $this->rid  = $row['regvol_id'];
+    $this->vgid = $row['regvol_grpid'];
+    $this->wgid = $row['regvol_wrkgrpid'];
+    $this->pid  = $row['regvol_projid'];
+    $this->checkedin = $row['regvol_checkedin'];
   }
 
   public function getName()  { return $this->name; }
@@ -62,58 +68,53 @@ class Volunteer {
   public function getProjectYearID() { return $this->pid; }
   public static function getByID($id) { return new Volunteer($id); }
   public static function getByName($name) { return new Volunteer(NULL, $name); }
+  public static function getFromRow($row) { return new Volunteer(NULL, NULL, $row);; }
 
   public function setVolunteerGroup($vid) {
     if( $this->uid == NULL ) return NULL;
-    $db = Loader::db();
-    $db->Execute("UPDATE volunteerheroRegisteredVolunteer SET ".
+    $res = $this->_updateQuery("UPDATE volunteerheroRegisteredVolunteer SET ".
         "regvol_grpid = ? WHERE regvol_id=?", array($vid, $this->rid));
-    if( $db->Affected_Rows()!=1 ) return NULL;
+    if( $res!=1 ) return NULL;
     $this->vgid = $vid;
     return $vid;
   }
 
   public function setWorkGroup($wid) {
     if( $this->uid == NULL ) return NULL;
-    $db = Loader::db();
-    $db->Execute("UPDATE volunteerheroRegisteredVolunteer SET ".
+    $res = $this->_updateQuery("UPDATE volunteerheroRegisteredVolunteer SET ".
         "regvol_wrkgrpid = ? WHERE regvol_id=?", array($wid, $this->rid));
-    if( $db->Affected_Rows()!=1 ) return NULL;
+    if( $res!=1 ) return NULL;
     $this->wgid = $wid;
     return $wid;
   }
 
   public function checkIn($cin=TRUE) {
     if( $this->uID == NULL ) return NULL;
-    $db = Loader::db();
-    $db->Execute("UPDATE volunteerheroRegisteredVolunteer SET ".
+    $res = $this->_updateQuery("UPDATE volunteerheroRegisteredVolunteer SET ".
         "regvol_checkedin=? WHERE regvol_id=?", array($cin, $this->rid));
-    if( $db->Affected_Rows()!=1 ) return NULL;
+    if( $res!=1 ) return NULL;
     $this->checkedin = $cin;
     return $cin;
   }
 
   public function delete() {
     if( $this->uID == NULL ) return false;
-    $db = Loader::db();
-    $db->Execute("DELETE FROM volunteerheroRegisteredVolunteer WHERE ".
+    $res = $this->_updateQuery("DELETE FROM volunteerheroRegisteredVolunteer WHERE ".
         "regvol_id = ?", array($this->rid));
-    if( $db->Afftected_Rows()==1 ) {
+    if( $res==1 ) {
       $this->uid==NULL;
     }
-    return $db->Affected_Rows()==1;
+    return $res==1;
   }
 
   public static function register($uid, $vgid, $wgid, $pid, $checkedin=FALSE) {
-    $db = Loader::db();
     $query = "INSERT INTO volunteerheroRegisteredVolunteer(regvol_grpid, ".
              "regvol_wrkgrpid, regvol_projid, regvol_uid, regvol_checkedin) ".
              "VALUES($vgid, $wgid, $pid, $uid, ".($checkedin?1:0).")";
-    $db->Execute($query);
+    $res = $this->_insertQuery($query);
     $ret = $id = NULL;
-    if( $db->Affected_Rows() != 0 ) {
-      $id = $db->Insert_ID();
-      $ret = new Volunteer($id);
+    if( $res != 0 ) {
+      $ret = new Volunteer($res);
     }
     return $ret;
   }

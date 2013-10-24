@@ -1,77 +1,70 @@
 <?php defined('C5_EXECUTE') or die(_("Access Denied."));
+Loader::model('volunteerhero', 'volunteerhero');
 
-class WorkGroupList {
-  public wList = array();
+class WorkGroupList extends VolunteerHeroListModel {
+  public function __construct($id=NULL, $name=NULL, $status=NULL, $evntid=NULL) {
+    parent::__construct("volunteerheroWorkGroup", "wrkgrp_id");
+    if( $id!=NULL ) $this->_addDirectCompare("wrkgrp_id", $id);
+    if( $name!=NULL ) $this->_addLikeCompare("wrkgrp_name", $name);
+    if( $status!=NULL ) $this->_addDirectCompare("wrkgrp_status", $status);
+    if( $eventid!=NULL ) $this->_addDirectCompare("wrkgrp_projid", $evntid);
 
-  public function __construct($id=NULL, $name=NULL, $status=NULL, $eventid=NULL) {
-    $compare = array();
-    if( $id!=NULL ) array_push($compare, "wrkgrp_id=$id");
-    if( $name!=NULL ) array_push($compare, "wrkgrp_name LIKE \"$name\"");
-    if( $status!=NULL ) array_push($compare, "wrkgrp_status=$status");
-    if( $eventid!=NULL ) array_push($compare, "wrkgrp_projid=$eventid");
+    $query = "SELECT * FROM volunteerheroWorkGroup";
+    $query .= $this->_getCompareClause();
 
-    $query = "SELECT wrkgrp_id FROM volunteerheroWorkGroup";
-    $len = count($compare);
-    if( $len > 0 ) {
-      $query .= " WHERE";
-      for($i=0; $i<$len; $i++) {
-        $query .= " " . $compare[$i];
-        if( $i < $len-1 ) $query .= " AND";
-      }
-    }
-
-    $db = Loader::db();
-    $res = $db->Execute($query);
+    $res = $this->_executeQuery($query);
     while( $row=$res->FetchRow() ) {
-      $w = WorkGroup::getByID($row['wrkgrp_id']);
-      if( !in_array($w, $wList) ) array_push($this->wList, $w);
+      $this->_addObject(WorkGroup::getFromRow($row));
     }
   }
 
-  public function getList() { return $this->wList; }
-  public static function getWorkGroupByID($id) { return new WorkGroupList($id); }
-  public static function getWorkGroupByName($name) { return new WorkGroupList(NULL, $name); }
-  public static function getWorkGroupByStatus($status) { return new WorkGroupList(NULL, NULL, $status); }
-  public static function getWorkGroupByEvent($eid) { return new WorkGroupList(NULL, NULL, NULL, $eid); }
+  public static function getWorkGroupsByID($id) { return new WorkGroupList($id); }
+  public static function getWorkGroupsByName($name) { return new WorkGroupList(NULL, $name); }
+  public static function getWorkGroupsByStatus($status) { return new WorkGroupList(NULL, NULL, $status); }
+  public static function getWorkGroupsByEvent($eid) { return new WorkGroupList(NULL, NULL, NULL, $eid); }
 }
 
-class WorkGroup {
-  public wid=NULL, eid=NULL, name=NULL, status=NULL;
+class WorkGroup extends VolunteerHeroModel {
+  public $wid=NULL, $eid=NULL, $name=NULL, $status=NULL;
 
-  private function _select(?$id=NULL, $name=NULL) {
-    if( $id==NULL && $name==NULL ) return;
-    $db = Loader::db();
+  private function _select($id=NULL, $name=NULL, $row=NULL ) {
+    if( $id==NULL && $name==NULL && $row==NULL ) return;
 
-    $query = "SELECT wrkgrp_id, wrkgrp_projid, wrkgrp_name, wrkgrp_status ".
+    if( $row==NULL ) {
+      $query = "SELECT wrkgrp_id, wrkgrp_projid, wrkgrp_name, wrkgrp_status ".
              "FROM volunteerheroWorkGroup WHERE ".
              ($id==NULL?"":"wrkgrp_id=$id ").
              ($id!=NULL&&$name!=NULL?"AND ":"").
              ($name==NULL?"":"wrkgrp_name LIKE \"$name\"");
-    $res = $db->Execute($query);
-    if($res) {
+      $res = $this->_executeQuery($query);
       $row = $res->FetchRow();
-      $this->wid = $row['wrkgrp_id'];
-      $this->eid = $row['wrkgrp_projid'];
-      $this->name = $row['wrkgrp_name'];
-      $this->status = $row['wrkgrp_status'];
     }
+
+    $this->wid = $row['wrkgrp_id'];
+    $this->eid = $row['wrkgrp_projid'];
+    $this->name = $row['wrkgrp_name'];
+    $this->status = $row['wrkgrp_status'];
   }
 
   private function _update($rowname, $value) {
+    if( $value==NULL && $rowname==NULL ) return;
     $db = Loader::db();
     $db->Execute("UPDATE volunteerheroWorkGroup SET $rowname=? WHERE ".
-        "wrkgrp_id=?", array($value, $this->wid);
+        "wrkgrp_id=?", array($value, $this->wid));
     if( $db->AffectedRows()!=1 ) return NULL;
     _select($this->wid);
   }
 
-  public function __construct($id=NULL, $name=NULL) { _select($id, $name); }
+  public function __construct($id=NULL, $name=NULL, $row=NULL) {
+    parent::__construct("volunteerheroWorkGroup", "wrkgrp_id");
+    $this->_select($id, $name, $row); }
   public function getName() { return $this->name; }
   public function getStatus() { return $this->status; }
-  public function getWorkGroupId() { return $this->wid; }
+  public function getWorkGroupID() { return $this->wid; }
   public function getEventID() { return $this->eid; }
   public static function getByID($id) { return new WorkGroup($id); }
   public static function getByName($name) { return new WorkGroup(NULL, $name); }
+  public static function getFromRow($row) { return new WorkGroup(NULL, NULL, $row); }
 
   public function setEventID($eid) { return _update("wrkgrp_projid", $eid); }
   public function setName($name) { return _update("wrkgrp_name", $name); }
