@@ -1,0 +1,1 @@
+A program to help with recruiting, managing, and organizing information to help prepare and carry out the community service project known as Winterization.
